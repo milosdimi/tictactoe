@@ -68,8 +68,16 @@ function handleClick(index, element) {
 }
 
 function restartGame() {
+  // Setze das Spielfeld zurück
   fields = [null, null, null, null, null, null, null, null, null];
   currentPlayer = "circle"; // Setzt den aktuellen Spieler zurück
+  gameOver = false; // Setze das Flag 'gameOver' zurück
+
+  // Entferne alle SVG-Gewinnlinien
+  const contentElement = document.getElementById("content");
+  contentElement.innerHTML = ""; // Entfernt den gesamten Inhalt (inkl. SVGs)
+
+  // Rendere das leere Spielfeld neu
   render();
 }
 
