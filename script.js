@@ -50,8 +50,8 @@ function handleClick(index, element) {
   if (fields[index] !== null || gameOver) return;
 
   clickSound.currentTime = 0;
-  clickSound.play().catch((error) => {
-    console.error("Fehler beim Abspielen des Klick-Sounds:", error);
+  clickSound.play().catch(error => {
+    console.error('Fehler beim Abspielen des Klick-Sounds:', error);
   });
 
   fields[index] = currentPlayer;
@@ -67,11 +67,14 @@ function handleClick(index, element) {
   const winner = checkWin();
   if (winner) {
     gameOver = true;
+
+    highlightWinningCells(winner);  // Gewinnerzellen hervorheben
+
     drawWinningLine(winner);
 
     winSound.currentTime = 0;
-    winSound.play().catch((error) => {
-      console.error("Fehler beim Abspielen des Gewinn-Sounds:", error);
+    winSound.play().catch(error => {
+      console.error('Fehler beim Abspielen des Gewinn-Sounds:', error);
     });
 
     if (currentPlayer === "circle") {
@@ -84,11 +87,10 @@ function handleClick(index, element) {
     return;
   }
 
-  // Überprüfe, ob das Spiel unentschieden ist
   checkDraw();
-
   currentPlayer = currentPlayer === "circle" ? "cross" : "circle";
 }
+
 
 function checkDraw() {
   // Überprüfe, ob es kein freies Feld mehr gibt und kein Gewinner gefunden wurde
@@ -98,6 +100,12 @@ function checkDraw() {
   }
 }
 
+function highlightWinningCells(winningCombination) {
+  // Gehe durch jedes Feld der Gewinnkombination und ändere die Hintergrundfarbe
+  winningCombination.forEach(index => {
+    document.getElementById(`cell-${index}`).style.backgroundColor = 'lightgreen';
+  });
+}
 
 
 // Funktion zur Aktualisierung des Scoreboards
