@@ -1,23 +1,23 @@
 let fields = [null, null, null, null, null, null, null, null, null];
-
-// Variable zur Steuerung, welcher Spieler als nächstes an der Reihe ist
-let currentPlayer = "circle"; // Startet mit 'circle'
-let gameOver = false; // Flag, um zu erkennen, ob das Spiel vorbei ist
-
-// Globale Variablen für die Punktzahlen
+let currentPlayer = "circle"; 
+let gameOver = false; 
+let gameMode = "";
 let player1Score = 0;
 let player2Score = 0;
-
-// Globale Variablen für die Audiodateien
 const clickSound = new Audio("audio/click.mp3");
 const winSound = new Audio("audio/win.mp3");
 
 function init() {
-  // Initiales Rendern der Tabelle
-  render();
+  document.getElementById("content").innerHTML = "";
 }
 
-// Die render-Funktion generiert die Tabelle und rendert sie in den Container
+function selectGameMode(mode) {
+  gameMode = mode;
+  document.getElementById("gameModeSelection").style.display = "none"; // Blende die Auswahl aus
+  render(); // Starte das Spiel
+}
+
+
 function render() {
   let tableHTML = "<table>";
   for (let i = 0; i < 3; i++) {
@@ -29,9 +29,9 @@ function render() {
 
       // Bestimme das Symbol, das in das Feld eingefügt wird
       if (field === "circle") {
-        symbol = generateCircleSVG(); // Kreis
+        symbol = generateCircleSVG();
       } else if (field === "cross") {
-        symbol = generateCrossSVG(); // Kreuz
+        symbol = generateCrossSVG();
       }
 
       // Falls das Feld leer ist, wird ein onclick-Attribut hinzugefügt
@@ -45,31 +45,34 @@ function render() {
   document.getElementById("content").innerHTML = tableHTML;
 }
 
-// Funktion, die aufgerufen wird, wenn auf ein Feld geklickt wird
 function handleClick(index, element) {
   if (fields[index] !== null || gameOver) return;
 
+  // Spiele den Klick-Sound ab
   clickSound.currentTime = 0;
   clickSound.play().catch(error => {
     console.error('Fehler beim Abspielen des Klick-Sounds:', error);
   });
 
+  // Setze den aktuellen Spieler in das Array
   fields[index] = currentPlayer;
 
+  // Setze das Symbol in das angeklickte td-Element
   if (currentPlayer === "circle") {
     element.innerHTML = generateCircleSVG();
   } else if (currentPlayer === "cross") {
     element.innerHTML = generateCrossSVG();
   }
 
+  // Entferne die onclick-Funktion, um weitere Klicks zu verhindern
   element.onclick = null;
 
+  // Überprüfe, ob jemand gewonnen hat
   const winner = checkWin();
   if (winner) {
     gameOver = true;
 
-    highlightWinningCells(winner);  // Gewinnerzellen hervorheben
-
+    highlightWinningCells(winner);
     drawWinningLine(winner);
 
     winSound.currentTime = 0;
@@ -87,9 +90,54 @@ function handleClick(index, element) {
     return;
   }
 
+  // Überprüfe, ob das Spiel unentschieden ist
   checkDraw();
+
+  // Wechsel zum anderen Spieler oder Computer
   currentPlayer = currentPlayer === "circle" ? "cross" : "circle";
+
+  // Wenn der Spielmodus "computer" ist und der Computer an der Reihe ist
+  if (gameMode === "computer" && currentPlayer === "cross" && !gameOver) {
+    setTimeout(computerMove, 500); // Der Computerzug erfolgt mit einer leichten Verzögerung
+  }
 }
+
+
+function computerMove() {
+  const availableFields = fields
+    .map((value, index) => (value === null ? index : null))
+    .filter(index => index !== null);
+
+  if (availableFields.length > 0) {
+    const randomIndex = availableFields[Math.floor(Math.random() * availableFields.length)];
+
+    fields[randomIndex] = "cross";
+    const cellElement = document.getElementById(`cell-${randomIndex}`);
+    cellElement.innerHTML = generateCrossSVG();
+    cellElement.onclick = null;
+
+    const winner = checkWin();
+    if (winner) {
+      gameOver = true;
+      highlightWinningCells(winner);
+      drawWinningLine(winner);
+
+      winSound.currentTime = 0;
+      winSound.play().catch(error => {
+        console.error('Fehler beim Abspielen des Gewinn-Sounds:', error);
+      });
+
+      player2Score++;
+      updateScoreboard();
+    } else {
+      checkDraw();
+      currentPlayer = "circle";
+    }
+  }
+}
+
+
+
 
 
 function checkDraw() {

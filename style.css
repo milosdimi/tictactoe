@@ -52,8 +52,10 @@ table tr td:last-child {
 
 .center {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 16px;
 }
 .mt-32 {
   margin-top: 32px;
