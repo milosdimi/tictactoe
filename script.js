@@ -74,21 +74,31 @@ function handleClick(index, element) {
       console.error("Fehler beim Abspielen des Gewinn-Sounds:", error);
     });
 
-    // Punkte dem Gewinner zuweisen
     if (currentPlayer === "circle") {
-      player1Score++; // Spieler 1 (Kreis) bekommt einen Punkt
+      player1Score++;
     } else {
-      player2Score++; // Spieler 2 (Kreuz) bekommt einen Punkt
+      player2Score++;
     }
 
-    // Aktualisiere das Scoreboard
     updateScoreboard();
-
     return;
   }
 
+  // Überprüfe, ob das Spiel unentschieden ist
+  checkDraw();
+
   currentPlayer = currentPlayer === "circle" ? "cross" : "circle";
 }
+
+function checkDraw() {
+  // Überprüfe, ob es kein freies Feld mehr gibt und kein Gewinner gefunden wurde
+  if (!fields.includes(null) && !checkWin()) {
+    gameOver = true; // Setze das Spiel als beendet
+    alert("Unentschieden!");
+  }
+}
+
+
 
 // Funktion zur Aktualisierung des Scoreboards
 function updateScoreboard() {
