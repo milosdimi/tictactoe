@@ -4,6 +4,10 @@ let fields = [null, null, null, null, null, null, null, null, null];
 let currentPlayer = "circle"; // Startet mit 'circle'
 let gameOver = false; // Flag, um zu erkennen, ob das Spiel vorbei ist
 
+// Globale Variablen für die Punktzahlen
+let player1Score = 0;
+let player2Score = 0;
+
 // Globale Variablen für die Audiodateien
 const clickSound = new Audio("audio/click.mp3");
 const winSound = new Audio("audio/win.mp3");
@@ -43,45 +47,53 @@ function render() {
 
 // Funktion, die aufgerufen wird, wenn auf ein Feld geklickt wird
 function handleClick(index, element) {
-  // Wenn das Feld bereits belegt ist oder das Spiel vorbei ist, wird nichts gemacht
   if (fields[index] !== null || gameOver) return;
 
-  // Spiele den Klick-Sound ab
-  clickSound.currentTime = 0; // Setzt den Sound zurück, falls er schnell hintereinander abgespielt wird
+  clickSound.currentTime = 0;
   clickSound.play().catch((error) => {
     console.error("Fehler beim Abspielen des Klick-Sounds:", error);
   });
 
-  // Setze den aktuellen Spieler in das Array
   fields[index] = currentPlayer;
 
-  // Setze das Symbol in das angeklickte td-Element
   if (currentPlayer === "circle") {
     element.innerHTML = generateCircleSVG();
   } else if (currentPlayer === "cross") {
     element.innerHTML = generateCrossSVG();
   }
 
-  // Entferne die onclick-Funktion, um weitere Klicks zu verhindern
   element.onclick = null;
 
-  // Überprüfe, ob jemand gewonnen hat
   const winner = checkWin();
   if (winner) {
     gameOver = true;
     drawWinningLine(winner);
 
-    // Spiele den Gewinn-Sound ab
-    winSound.currentTime = 0; // Setzt den Sound zurück, falls er schnell hintereinander abgespielt wird
+    winSound.currentTime = 0;
     winSound.play().catch((error) => {
       console.error("Fehler beim Abspielen des Gewinn-Sounds:", error);
     });
 
+    // Punkte dem Gewinner zuweisen
+    if (currentPlayer === "circle") {
+      player1Score++; // Spieler 1 (Kreis) bekommt einen Punkt
+    } else {
+      player2Score++; // Spieler 2 (Kreuz) bekommt einen Punkt
+    }
+
+    // Aktualisiere das Scoreboard
+    updateScoreboard();
+
     return;
   }
 
-  // Wechsel zum anderen Spieler
   currentPlayer = currentPlayer === "circle" ? "cross" : "circle";
+}
+
+// Funktion zur Aktualisierung des Scoreboards
+function updateScoreboard() {
+  document.getElementById("player1Score").textContent = player1Score;
+  document.getElementById("player2Score").textContent = player2Score;
 }
 
 function restartGame() {
