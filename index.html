@@ -16,7 +16,9 @@
 
     <div id="gameModeSelection" class="center mt-32">
       <button onclick="selectGameMode('human')">Gegen Mensch spielen</button>
-      <button onclick="selectGameMode('computer')">Gegen Computer spielen</button>
+      <button onclick="selectGameMode('computer')">
+        Gegen Computer spielen
+      </button>
     </div>
 
     <div id="content" class="mt-32"></div>
@@ -25,9 +27,10 @@
       <p>Player 1 (Kreis): <span id="player1Score">0</span></p>
       <p>Player 2 (Kreuz): <span id="player2Score">0</span></p>
     </div>
-    
+
     <div class="center mt-32">
       <button onclick="restartGame()">Spiel neu starten</button>
+      <button onclick="changeOpponent()">Gegner wechseln</button>
     </div>
 
     <script src="script.js"></script>

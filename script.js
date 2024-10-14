@@ -1,6 +1,6 @@
 let fields = [null, null, null, null, null, null, null, null, null];
-let currentPlayer = "circle"; 
-let gameOver = false; 
+let currentPlayer = "circle";
+let gameOver = false;
 let gameMode = "";
 let player1Score = 0;
 let player2Score = 0;
@@ -16,7 +16,6 @@ function selectGameMode(mode) {
   document.getElementById("gameModeSelection").style.display = "none"; // Blende die Auswahl aus
   render(); // Starte das Spiel
 }
-
 
 function render() {
   let tableHTML = "<table>";
@@ -50,8 +49,8 @@ function handleClick(index, element) {
 
   // Spiele den Klick-Sound ab
   clickSound.currentTime = 0;
-  clickSound.play().catch(error => {
-    console.error('Fehler beim Abspielen des Klick-Sounds:', error);
+  clickSound.play().catch((error) => {
+    console.error("Fehler beim Abspielen des Klick-Sounds:", error);
   });
 
   // Setze den aktuellen Spieler in das Array
@@ -76,8 +75,8 @@ function handleClick(index, element) {
     drawWinningLine(winner);
 
     winSound.currentTime = 0;
-    winSound.play().catch(error => {
-      console.error('Fehler beim Abspielen des Gewinn-Sounds:', error);
+    winSound.play().catch((error) => {
+      console.error("Fehler beim Abspielen des Gewinn-Sounds:", error);
     });
 
     if (currentPlayer === "circle") {
@@ -102,43 +101,84 @@ function handleClick(index, element) {
   }
 }
 
-
 function computerMove() {
-  const availableFields = fields
-    .map((value, index) => (value === null ? index : null))
-    .filter(index => index !== null);
+  // Überprüfe, ob der Computer gewinnen kann
+  let move = findWinningMove("cross");
+  if (move === null) {
+    // Wenn kein Gewinnzug vorhanden ist, versuche, den Gegner zu blockieren
+    move = findWinningMove("circle");
+  }
 
-  if (availableFields.length > 0) {
-    const randomIndex = availableFields[Math.floor(Math.random() * availableFields.length)];
+  // Wenn weder Gewinnen noch Blockieren möglich ist, wähle ein zufälliges Feld
+  if (move === null) {
+    const availableFields = fields
+      .map((value, index) => (value === null ? index : null))
+      .filter((index) => index !== null);
 
-    fields[randomIndex] = "cross";
-    const cellElement = document.getElementById(`cell-${randomIndex}`);
-    cellElement.innerHTML = generateCrossSVG();
-    cellElement.onclick = null;
+    move = availableFields[Math.floor(Math.random() * availableFields.length)];
+  }
 
-    const winner = checkWin();
-    if (winner) {
-      gameOver = true;
-      highlightWinningCells(winner);
-      drawWinningLine(winner);
+  // Führe den Zug aus
+  fields[move] = "cross";
+  const cellElement = document.getElementById(`cell-${move}`);
+  cellElement.innerHTML = generateCrossSVG();
+  cellElement.onclick = null;
 
-      winSound.currentTime = 0;
-      winSound.play().catch(error => {
-        console.error('Fehler beim Abspielen des Gewinn-Sounds:', error);
-      });
+  // Überprüfe, ob der Computer gewonnen hat
+  const winner = checkWin();
+  if (winner) {
+    gameOver = true;
+    highlightWinningCells(winner);
+    drawWinningLine(winner);
 
-      player2Score++;
-      updateScoreboard();
-    } else {
-      checkDraw();
-      currentPlayer = "circle";
-    }
+    winSound.currentTime = 0;
+    winSound.play().catch((error) => {
+      console.error("Fehler beim Abspielen des Gewinn-Sounds:", error);
+    });
+
+    player2Score++;
+    updateScoreboard();
+  } else {
+    // Wechsel zum Spieler
+    checkDraw();
+    currentPlayer = "circle";
   }
 }
 
+// Hilfsfunktion, um einen Gewinnzug zu finden
+function findWinningMove(player) {
+  const winCombinations = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
 
+  for (let combination of winCombinations) {
+    const [a, b, c] = combination;
+    if (fields[a] === player && fields[b] === player && fields[c] === null) {
+      return c;
+    } else if (
+      fields[a] === player &&
+      fields[c] === player &&
+      fields[b] === null
+    ) {
+      return b;
+    } else if (
+      fields[b] === player &&
+      fields[c] === player &&
+      fields[a] === null
+    ) {
+      return a;
+    }
+  }
 
-
+  return null; // Kein Gewinnzug vorhanden
+}
 
 function checkDraw() {
   // Überprüfe, ob es kein freies Feld mehr gibt und kein Gewinner gefunden wurde
@@ -150,11 +190,11 @@ function checkDraw() {
 
 function highlightWinningCells(winningCombination) {
   // Gehe durch jedes Feld der Gewinnkombination und ändere die Hintergrundfarbe
-  winningCombination.forEach(index => {
-    document.getElementById(`cell-${index}`).style.backgroundColor = 'lightgreen';
+  winningCombination.forEach((index) => {
+    document.getElementById(`cell-${index}`).style.backgroundColor =
+      "lightgreen";
   });
 }
-
 
 // Funktion zur Aktualisierung des Scoreboards
 function updateScoreboard() {
@@ -261,6 +301,24 @@ function drawWinningLine(winningCombination) {
   // Füge die Linie dem Container hinzu
   const contentElement = document.getElementById("content");
   contentElement.innerHTML += svgHTML;
+}
+
+function changeOpponent() {
+  // Setze das Spielfeld zurück
+  fields = [null, null, null, null, null, null, null, null, null];
+  currentPlayer = "circle"; // Setze den aktuellen Spieler zurück
+  gameOver = false; // Setze das Spiel-Flag zurück
+  player1Score = 0; // Setze die Punktzahlen zurück
+  player2Score = 0;
+
+  // Entferne alle SVG-Gewinnlinien
+  document.getElementById("content").innerHTML = "";
+
+  // Setze die Auswahl für den Spielmodus wieder sichtbar
+  document.getElementById("gameModeSelection").style.display = "flex";
+
+  // Aktualisiere das Scoreboard
+  updateScoreboard();
 }
 
 // Initialisiere das Spiel
